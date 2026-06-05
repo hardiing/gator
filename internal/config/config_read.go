@@ -1,34 +1,74 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 )
 
-const configFileName = " .gatorconfig.json"
+const configFileName = ".gatorconfig.json"
 
 type Config struct {
-	url      string `json:"db_url"`
-	username string `json:"current_user_name"`
+	Url      string `json:"db_url"`
+	Username string `json:"current_user_name"`
 }
 
 func Read() Config {
-	// Export a Read function that reads the JSON file found at ~/.gatorconfig.json
-	// and returns a Config struct. It should read the file from the HOME directory,
-	// then decode the JSON string into a new Config struct. I used os.UserHomeDir to get the location of HOME.
-	home := os.UserHomeDir
-	fmt.Printf("%s", home)
+	path, err := getConfigFilePath()
+	if err != nil {
+		return Config{}
+	}
+
+	cfg := Config{}
+
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("url: %s, username: %s\n", cfg.Url, cfg.Username)
+
+	return cfg
 }
 
 func SetUser(cfg Config) Config {
-	// Export a SetUser method on the Config struct that writes the config struct
-	// to the JSON file after setting the current_user_name field.
+	current_user_name := "nathan"
+	cfg.Username = current_user_name
+	write(cfg)
+	return cfg
 }
 
 func getConfigFilePath() (string, error) {
-
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	configFilePath := filepath.Join(home, configFileName)
+	return configFilePath, nil
 }
 
 func write(cfg Config) error {
-
+	jsonData, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	configFilePath := filepath.Join(home, configFileName)
+	err = os.WriteFile(configFilePath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+	return err
 }

@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"github.com/hardiing/gator/internal/config"
 )
 
 func main() {
-	fmt.Println("hi")
+	cfg := config.Read()
+	config.SetUser(cfg)
+	config.Read()
 }
