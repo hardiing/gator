@@ -15,10 +15,10 @@ type Config struct {
 	Username string `json:"current_user_name"`
 }
 
-func Read() Config {
+func Read() (Config, error) {
 	path, err := getConfigFilePath()
 	if err != nil {
-		return Config{}
+		return Config{}, err
 	}
 
 	cfg := Config{}
@@ -37,14 +37,13 @@ func Read() Config {
 
 	fmt.Printf("url: %s, username: %s\n", cfg.Url, cfg.Username)
 
-	return cfg
+	return cfg, err
 }
 
-func SetUser(cfg Config) Config {
-	current_user_name := "nathan"
-	cfg.Username = current_user_name
-	write(cfg)
-	return cfg
+func (cfg *Config) SetUser(userName string) error {
+	cfg.Username = userName
+	write(*cfg)
+	return nil
 }
 
 func getConfigFilePath() (string, error) {
