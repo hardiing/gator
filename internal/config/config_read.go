@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -35,7 +34,7 @@ func Read() (Config, error) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("url: %s, username: %s\n", cfg.Url, cfg.Username)
+	//fmt.Printf("url: %s, username: %s\n", cfg.Url, cfg.Username)
 
 	return cfg, err
 }

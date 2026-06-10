@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/hardiing/gator/internal/config"
+	"github.com/hardiing/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -13,7 +16,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading config: %v", err)
 	}
+
+	db, err := sql.Open("postgres", cfg.Url)
+	dbQueries := database.New(db)
+
 	programState := state{
+		db:  dbQueries,
 		cfg: &cfg,
 	}
 	commandsMap := make(map[string]func(*state, command) error)
@@ -21,6 +29,7 @@ func main() {
 		commands: commandsMap,
 	}
 	programCommands.register("login", handlerLogin)
+	programCommands.register("register", handlerRegister)
 
 	input := os.Args
 
