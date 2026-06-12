@@ -32,3 +32,7 @@ func (c *commands) run(s *state, cmd command) error {
 func (c *commands) register(name string, f func(*state, command) error) {
 	c.commands[name] = f
 }
+
+/* func (c *commands) reset(name string, f func(*state, command) error) {
+	c.commands[name] = f
+} */

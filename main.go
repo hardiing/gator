@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -30,6 +29,7 @@ func main() {
 	}
 	programCommands.register("login", handlerLogin)
 	programCommands.register("register", handlerRegister)
+	programCommands.register("reset", handlerReset)
 
 	input := os.Args
 
@@ -40,11 +40,6 @@ func main() {
 	//programName := input[0]
 	inputCommand := input[1]
 	inputArguments := input[2:]
-
-	if len(inputArguments) == 0 {
-		fmt.Println("missing username argument")
-		os.Exit(1)
-	}
 
 	userCommand := command{
 		name: inputCommand,
