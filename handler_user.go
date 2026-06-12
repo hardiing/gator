@@ -50,19 +50,34 @@ func handlerRegister(s *state, cmd command) error {
 	}
 
 	s.cfg.SetUser(result.Name)
-	fmt.Printf("user %s created, %v\n", result.Name, result)
+	fmt.Printf("user %s created\n", result.Name)
 	return nil
 }
 
 func handlerReset(s *state, cmd command) error {
-
 	ctx := context.Background()
 	err := s.db.DeleteUsers(ctx)
 	if err != nil {
 		fmt.Errorf("reset unsuccessful: %w\n", err)
 		os.Exit(1)
-		return err
 	}
 	fmt.Println("users table reset")
+	return nil
+}
+
+func handlerUsers(s *state, cmd command) error {
+	ctx := context.Background()
+	rows, err := s.db.GetUsers(ctx)
+	if err != nil {
+		fmt.Errorf("error in accessing table: %w\n", err)
+		os.Exit(1)
+	}
+	for _, row := range rows {
+		if row == s.cfg.Username {
+			fmt.Printf("* %s (current)\n", row)
+		} else {
+			fmt.Printf("* %s\n", row)
+		}
+	}
 	return nil
 }

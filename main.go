@@ -30,6 +30,7 @@ func main() {
 	programCommands.register("login", handlerLogin)
 	programCommands.register("register", handlerRegister)
 	programCommands.register("reset", handlerReset)
+	programCommands.register("users", handlerUsers)
 
 	input := os.Args
 
