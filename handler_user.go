@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html"
 	"os"
 	"time"
 
@@ -78,6 +79,25 @@ func handlerUsers(s *state, cmd command) error {
 		} else {
 			fmt.Printf("* %s\n", row)
 		}
+	}
+	return nil
+}
+
+func handlerAgg(s *state, cmd command) error {
+	ctx := context.Background()
+	feedURL := "https://www.wagslane.dev/index.xml"
+	feed, err := fetchFeed(ctx, feedURL)
+	if err != nil {
+		fmt.Printf("Error found fetching feed: %v\n", err)
+	}
+	fmt.Printf("Title: %s\n", html.UnescapeString(feed.Channel.Title))
+	fmt.Printf("Link: %s\n", feed.Channel.Link)
+	fmt.Printf("Description: %s\n", html.UnescapeString(feed.Channel.Description))
+	for _, item := range feed.Channel.Item {
+		fmt.Printf("Item Title: %s\n", html.UnescapeString(item.Title))
+		fmt.Printf("Item Link: %s\n", item.Link)
+		fmt.Printf("Item Description: %s\n", html.UnescapeString(item.Description))
+		fmt.Printf("Item PubDate: %s\n", item.PubDate)
 	}
 	return nil
 }
