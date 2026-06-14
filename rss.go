@@ -64,5 +64,23 @@ func addFeed(s *state, user database.User, name, url string) (database.Feed, err
 		Url:       url,
 		UserID:    user.ID,
 	}
+
 	return s.db.CreateFeed(ctx, params)
+}
+
+func followFeed(s *state, user database.User, url string) (database.CreateFeedFollowRow, error) {
+	ctx := context.Background()
+	feed, err := s.db.GetFeedByURL(ctx, url)
+	if err != nil {
+		fmt.Printf("GetFeedByURL failed: %v\n", err)
+		os.Exit(1)
+	}
+	params := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	}
+	return s.db.CreateFeedFollow(ctx, params)
 }

@@ -34,6 +34,8 @@ func main() {
 	programCommands.register("agg", handlerAgg)
 	programCommands.register("addfeed", handlerAdd)
 	programCommands.register("feeds", handlerFeeds)
+	programCommands.register("follow", handlerFollow)
+	programCommands.register("following", handlerFollowing)
 
 	input := os.Args
 

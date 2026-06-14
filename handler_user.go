@@ -127,6 +127,17 @@ func handlerAdd(s *state, cmd command) error {
 	fmt.Printf("Name: %s\n", feed.Name)
 	fmt.Printf("URL: %s\n", feed.Url)
 	fmt.Printf("User ID: %v\n", feed.UserID)
+	feedFollowParams := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	}
+	_, err = s.db.CreateFeedFollow(ctx, feedFollowParams)
+	if err != nil {
+		return fmt.Errorf("Error creating Feed Follow: %v\n", err)
+	}
 	return nil
 }
 
@@ -141,6 +152,42 @@ func handlerFeeds(s *state, cmd command) error {
 		fmt.Printf("Feed Name: %s\n", row.Name)
 		fmt.Printf("Feed URL: %s\n", row.Url)
 		fmt.Printf("Added by User: %s\n", row.Username)
+	}
+	return nil
+}
+
+func handlerFollow(s *state, cmd command) error {
+	if len(cmd.args) != 1 {
+		fmt.Println("Follow requires just one argument")
+		os.Exit(1)
+	}
+	ctx := context.Background()
+	user, err := s.db.GetUser(ctx, s.cfg.Username)
+	if err != nil {
+		fmt.Printf("Error encountered: %v\n", err)
+		os.Exit(1)
+	}
+	result, err := followFeed(s, user, cmd.args[0])
+	fmt.Printf("Feed name: %s\n", result.FeedName)
+	fmt.Printf("Current user: %s\n", result.UserName)
+	return nil
+}
+
+func handlerFollowing(s *state, cmd command) error {
+	if len(cmd.args) > 0 {
+		fmt.Println("No arguments required")
+		os.Exit(1)
+	}
+	ctx := context.Background()
+	user, err := s.db.GetUser(ctx, s.cfg.Username)
+	if err != nil {
+		fmt.Printf("Error encountered: %v\n", err)
+		os.Exit(1)
+	}
+	rows, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
+	fmt.Printf("Current User: %s\n", user.Name)
+	for _, row := range rows {
+		fmt.Printf("Feed: %s\n", row.FeedName)
 	}
 	return nil
 }
