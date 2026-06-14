@@ -33,6 +33,7 @@ func main() {
 	programCommands.register("users", handlerUsers)
 	programCommands.register("agg", handlerAgg)
 	programCommands.register("addfeed", handlerAdd)
+	programCommands.register("feeds", handlerFeeds)
 
 	input := os.Args
 

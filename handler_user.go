@@ -129,3 +129,18 @@ func handlerAdd(s *state, cmd command) error {
 	fmt.Printf("User ID: %v\n", feed.UserID)
 	return nil
 }
+
+func handlerFeeds(s *state, cmd command) error {
+	ctx := context.Background()
+	rows, err := s.db.GetFeeds(ctx)
+	if err != nil {
+		fmt.Errorf("error in accessing feeds table: %w\n", err)
+		os.Exit(1)
+	}
+	for _, row := range rows {
+		fmt.Printf("Feed Name: %s\n", row.Name)
+		fmt.Printf("Feed URL: %s\n", row.Url)
+		fmt.Printf("Added by User: %s\n", row.Username)
+	}
+	return nil
+}
