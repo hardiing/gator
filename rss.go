@@ -7,6 +7,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/hardiing/gator/internal/database"
 )
 
 type RSSFeed struct {
@@ -47,7 +51,18 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	if err := xml.Unmarshal(body, &feed); err != nil {
 		fmt.Printf("Error encountered: %v\n", err)
 	}
-	//fmt.Printf("Item Link: %s\n", feed.Channel.Item.Link)
-	//fmt.Printf("Item Description: %s\n", feed.Channel.Item)
 	return &feed, nil
+}
+
+func addFeed(s *state, user database.User, name, url string) (database.Feed, error) {
+	ctx := context.Background()
+	params := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      name,
+		Url:       url,
+		UserID:    user.ID,
+	}
+	return s.db.CreateFeed(ctx, params)
 }

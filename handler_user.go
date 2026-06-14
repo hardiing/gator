@@ -101,3 +101,31 @@ func handlerAgg(s *state, cmd command) error {
 	}
 	return nil
 }
+
+func handlerAdd(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		fmt.Printf("Not enough arguments for %s\n", cmd.name)
+		os.Exit(1)
+		return nil
+	}
+	ctx := context.Background()
+	user, err := s.db.GetUser(ctx, s.cfg.Username)
+	if err != nil {
+		fmt.Printf("Error encountered: %v\n", err)
+		os.Exit(1)
+	}
+	feed, err := addFeed(s, user, cmd.args[0], cmd.args[1])
+	if err != nil {
+		fmt.Printf("Add feed failed: %v\n", err)
+		os.Exit(1)
+		return err
+	}
+	fmt.Println("Adding to feeds table:")
+	fmt.Printf("ID: %v\n", feed.ID)
+	fmt.Printf("Created at: %v\n", feed.CreatedAt)
+	fmt.Printf("Updated at: %v\n", feed.UpdatedAt)
+	fmt.Printf("Name: %s\n", feed.Name)
+	fmt.Printf("URL: %s\n", feed.Url)
+	fmt.Printf("User ID: %v\n", feed.UserID)
+	return nil
+}
