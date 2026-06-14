@@ -83,3 +83,20 @@ func followFeed(s *state, user database.User, url string) (database.CreateFeedFo
 	}
 	return s.db.CreateFeedFollow(ctx, params)
 }
+
+func unfollowFeed(s *state, user database.User, url string) error {
+	ctx := context.Background()
+	feed, err := s.db.GetFeedByURL(ctx, url)
+	if err != nil {
+		return fmt.Errorf("Error getting feed by url: %v\n", err)
+	}
+	params := database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+	err = s.db.DeleteFeedFollow(ctx, params)
+	if err != nil {
+		return fmt.Errorf("Error deleting feed follow: %v\n", err)
+	}
+	return err
+}

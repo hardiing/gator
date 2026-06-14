@@ -180,3 +180,11 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	}
 	return nil
 }
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("Unfollow requires just one argument.\n")
+	}
+	return unfollowFeed(s, user, cmd.args[0])
+
+}
