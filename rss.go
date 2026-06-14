@@ -32,8 +32,7 @@ type RSSItem struct {
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, nil)
 	if err != nil {
-		fmt.Printf("Error: %w\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("Error: %v\n", err)
 	}
 	req.Header.Set("User-Agent", "gator")
 

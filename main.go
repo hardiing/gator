@@ -32,10 +32,10 @@ func main() {
 	programCommands.register("reset", handlerReset)
 	programCommands.register("users", handlerUsers)
 	programCommands.register("agg", handlerAgg)
-	programCommands.register("addfeed", handlerAdd)
+	programCommands.register("addfeed", middlewareLoggedIn(handlerAdd))
 	programCommands.register("feeds", handlerFeeds)
-	programCommands.register("follow", handlerFollow)
-	programCommands.register("following", handlerFollowing)
+	programCommands.register("follow", middlewareLoggedIn(handlerFollow))
+	programCommands.register("following", middlewareLoggedIn(handlerFollowing))
 
 	input := os.Args
 

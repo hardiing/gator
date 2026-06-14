@@ -59,8 +59,7 @@ func handlerReset(s *state, cmd command) error {
 	ctx := context.Background()
 	err := s.db.DeleteUsers(ctx)
 	if err != nil {
-		fmt.Errorf("reset unsuccessful: %w\n", err)
-		os.Exit(1)
+		return fmt.Errorf("reset unsuccessful: %w\n", err)
 	}
 	fmt.Println("users table reset")
 	return nil
@@ -70,8 +69,7 @@ func handlerUsers(s *state, cmd command) error {
 	ctx := context.Background()
 	rows, err := s.db.GetUsers(ctx)
 	if err != nil {
-		fmt.Errorf("error in accessing table: %w\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error in accessing table: %w\n", err)
 	}
 	for _, row := range rows {
 		if row == s.cfg.Username {
@@ -102,18 +100,14 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAdd(s *state, cmd command) error {
+func handlerAdd(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 2 {
 		fmt.Printf("Not enough arguments for %s\n", cmd.name)
 		os.Exit(1)
 		return nil
 	}
 	ctx := context.Background()
-	user, err := s.db.GetUser(ctx, s.cfg.Username)
-	if err != nil {
-		fmt.Printf("Error encountered: %v\n", err)
-		os.Exit(1)
-	}
+
 	feed, err := addFeed(s, user, cmd.args[0], cmd.args[1])
 	if err != nil {
 		fmt.Printf("Add feed failed: %v\n", err)
@@ -145,8 +139,7 @@ func handlerFeeds(s *state, cmd command) error {
 	ctx := context.Background()
 	rows, err := s.db.GetFeeds(ctx)
 	if err != nil {
-		fmt.Errorf("error in accessing feeds table: %w\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error in accessing feeds table: %w\n", err)
 	}
 	for _, row := range rows {
 		fmt.Printf("Feed Name: %s\n", row.Name)
@@ -156,35 +149,31 @@ func handlerFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
 		fmt.Println("Follow requires just one argument")
 		os.Exit(1)
 	}
-	ctx := context.Background()
-	user, err := s.db.GetUser(ctx, s.cfg.Username)
-	if err != nil {
-		fmt.Printf("Error encountered: %v\n", err)
-		os.Exit(1)
-	}
+
 	result, err := followFeed(s, user, cmd.args[0])
+	if err != nil {
+		return fmt.Errorf("Error running followFeed: %v\n", err)
+	}
 	fmt.Printf("Feed name: %s\n", result.FeedName)
 	fmt.Printf("Current user: %s\n", result.UserName)
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.args) > 0 {
 		fmt.Println("No arguments required")
 		os.Exit(1)
 	}
 	ctx := context.Background()
-	user, err := s.db.GetUser(ctx, s.cfg.Username)
-	if err != nil {
-		fmt.Printf("Error encountered: %v\n", err)
-		os.Exit(1)
-	}
 	rows, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
+	if err != nil {
+		return fmt.Errorf("Error with GetFeedFollowsForUser query: %v\n", err)
+	}
 	fmt.Printf("Current User: %s\n", user.Name)
 	for _, row := range rows {
 		fmt.Printf("Feed: %s\n", row.FeedName)
