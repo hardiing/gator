@@ -88,22 +88,11 @@ func handlerAgg(s *state, cmd command) error {
 		return fmt.Errorf("Error parsing time duration: %v\n", err)
 	}
 	fmt.Printf("Collecting feeds every %v\n", time_between_reqs)
-	//ctx := context.Background()
-	scrapeFeeds(s)
-	//feed, err := fetchFeed(ctx, feedURL)
-	/* if err != nil {
-		fmt.Printf("Error found fetching feed: %v\n", err)
+	ticker := time.NewTicker(time_between_reqs)
+	defer ticker.Stop()
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
 	}
-	fmt.Printf("Title: %s\n", html.UnescapeString(feed.Channel.Title))
-	fmt.Printf("Link: %s\n", feed.Channel.Link)
-	fmt.Printf("Description: %s\n", html.UnescapeString(feed.Channel.Description))
-	for _, item := range feed.Channel.Item {
-		fmt.Printf("Item Title: %s\n", html.UnescapeString(item.Title))
-		fmt.Printf("Item Link: %s\n", item.Link)
-		fmt.Printf("Item Description: %s\n", html.UnescapeString(item.Description))
-		fmt.Printf("Item PubDate: %s\n", item.PubDate)
-	} */
-	return nil
 }
 
 func handlerAdd(s *state, cmd command, user database.User) error {
