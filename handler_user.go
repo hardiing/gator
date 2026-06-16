@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"html"
+
+	//"html"
 	"os"
 	"time"
 
@@ -82,10 +83,15 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	ctx := context.Background()
-	feedURL := "https://www.wagslane.dev/index.xml"
-	feed, err := fetchFeed(ctx, feedURL)
+	time_between_reqs, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
+		return fmt.Errorf("Error parsing time duration: %v\n", err)
+	}
+	fmt.Printf("Collecting feeds every %v\n", time_between_reqs)
+	//ctx := context.Background()
+	scrapeFeeds(s)
+	//feed, err := fetchFeed(ctx, feedURL)
+	/* if err != nil {
 		fmt.Printf("Error found fetching feed: %v\n", err)
 	}
 	fmt.Printf("Title: %s\n", html.UnescapeString(feed.Channel.Title))
@@ -96,7 +102,7 @@ func handlerAgg(s *state, cmd command) error {
 		fmt.Printf("Item Link: %s\n", item.Link)
 		fmt.Printf("Item Description: %s\n", html.UnescapeString(item.Description))
 		fmt.Printf("Item PubDate: %s\n", item.PubDate)
-	}
+	} */
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"os"
@@ -99,4 +100,26 @@ func unfollowFeed(s *state, user database.User, url string) error {
 		return fmt.Errorf("Error deleting feed follow: %v\n", err)
 	}
 	return err
+}
+
+func scrapeFeeds(s *state) {
+	ctx := context.Background()
+	next, err := s.db.GetNextFeedToFetch(ctx)
+	if err != nil {
+		fmt.Printf("Error getting next feed to fetch: %v\n", err)
+		return
+	}
+	_, err = s.db.MarkFeedFetched(ctx, next.ID)
+	if err != nil {
+		fmt.Printf("Error marking as fetched: %v\n", err)
+		return
+	}
+	fetch, err := fetchFeed(ctx, next.Url)
+	if err != nil {
+		fmt.Printf("Error getting feed by URL: %v\n", err)
+		return
+	}
+	for _, item := range fetch.Channel.Item {
+		fmt.Printf("Item Title: %s\n", html.UnescapeString(item.Title))
+	}
 }
