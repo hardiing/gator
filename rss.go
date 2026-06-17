@@ -116,7 +116,6 @@ func scrapeFeeds(s *state) {
 		fmt.Printf("Error marking as fetched: %v\n", err)
 		return
 	}
-	fmt.Printf("NEXT.URL: %s\n", next.Url)
 	fetch, err := fetchFeed(ctx, next.Url)
 	if err != nil {
 		fmt.Printf("Error getting feed by URL: %v\n", err)
@@ -124,19 +123,8 @@ func scrapeFeeds(s *state) {
 	}
 	for _, item := range fetch.Channel.Item {
 		pubDateTime, err := time.Parse(time.RFC3339, item.PubDate)
-		//var pt sql.NullTime
 		if err != nil {
 			pubDateTime, err = time.Parse(time.RFC1123Z, item.PubDate)
-			/* fmt.Printf("Error parsing RFC3339: %v\n", err)
-				pt = sql.NullTime{
-					Time:  pubDateTime,
-					Valid: false,
-				}
-			} else {
-				pt = sql.NullTime{
-					Time:  pubDateTime,
-					Valid: true,
-				} */
 		}
 
 		pt := sql.NullTime{Valid: err == nil}
@@ -170,4 +158,4 @@ func scrapeFeeds(s *state) {
 			}
 		}
 	}
-} //fmt.Printf("Item Title: %s\n", html.UnescapeString(item.Title))
+}

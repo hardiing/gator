@@ -45,7 +45,6 @@ func main() {
 		log.Fatal("need two arguments")
 	}
 
-	//programName := input[0]
 	inputCommand := input[1]
 	inputArguments := input[2:]
 

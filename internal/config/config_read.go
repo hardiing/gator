@@ -34,8 +34,6 @@ func Read() (Config, error) {
 		log.Fatal(err)
 	}
 
-	//fmt.Printf("url: %s, username: %s\n", cfg.Url, cfg.Username)
-
 	return cfg, err
 }
 
