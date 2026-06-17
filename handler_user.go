@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	//"html"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -182,4 +182,28 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	}
 	return unfollowFeed(s, user, cmd.args[0])
 
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	var limit int32
+	ctx := context.Background()
+	if len(cmd.args) != 1 {
+		limit = 2
+	} else {
+		convertArg, err := strconv.ParseInt(cmd.args[0], 10, 32)
+		limit = int32(convertArg)
+		if err != nil {
+			fmt.Printf("error converting argument to int")
+		}
+	}
+	browseFeeds, err := s.db.GetPostsForUser(ctx, limit)
+	if err != nil {
+		return fmt.Errorf("Error getting posts for user: %v\n", err)
+	}
+	for _, post := range browseFeeds {
+		fmt.Printf("Title: %s\n", post.Title)
+		fmt.Printf("Description: %s\n", post.Description)
+		fmt.Printf("Published At: %s\n", post.PublishedAt.Time)
+	}
+	return nil
 }

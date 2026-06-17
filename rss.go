@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
+	"errors"
 	"fmt"
-	"html"
 	"io"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hardiing/gator/internal/database"
+	"github.com/lib/pq"
 )
 
 type RSSFeed struct {
@@ -114,12 +116,58 @@ func scrapeFeeds(s *state) {
 		fmt.Printf("Error marking as fetched: %v\n", err)
 		return
 	}
+	fmt.Printf("NEXT.URL: %s\n", next.Url)
 	fetch, err := fetchFeed(ctx, next.Url)
 	if err != nil {
 		fmt.Printf("Error getting feed by URL: %v\n", err)
 		return
 	}
 	for _, item := range fetch.Channel.Item {
-		fmt.Printf("Item Title: %s\n", html.UnescapeString(item.Title))
+		pubDateTime, err := time.Parse(time.RFC3339, item.PubDate)
+		//var pt sql.NullTime
+		if err != nil {
+			pubDateTime, err = time.Parse(time.RFC1123Z, item.PubDate)
+			/* fmt.Printf("Error parsing RFC3339: %v\n", err)
+				pt = sql.NullTime{
+					Time:  pubDateTime,
+					Valid: false,
+				}
+			} else {
+				pt = sql.NullTime{
+					Time:  pubDateTime,
+					Valid: true,
+				} */
+		}
+
+		pt := sql.NullTime{Valid: err == nil}
+		if err == nil {
+			pt.Time = pubDateTime
+		}
+		now := time.Now()
+
+		params := database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   now,
+			UpdatedAt:   now,
+			Title:       item.Title,
+			Url:         next.Url,
+			Description: item.Description,
+			PublishedAt: pt,
+			FeedID:      next.ID,
+		}
+		_, err = s.db.CreatePost(ctx, params)
+		if err != nil {
+			var pqErr *pq.Error
+			if errors.As(err, &pqErr) {
+				// "23505" represents unique_violation in Postgres
+				if pqErr.Code == "23505" {
+					continue
+				} else {
+					fmt.Printf("Error encountered: %s\n", err)
+				}
+			} else {
+				fmt.Printf("Error creating post: %v\n", err)
+			}
+		}
 	}
-}
+} //fmt.Printf("Item Title: %s\n", html.UnescapeString(item.Title))
